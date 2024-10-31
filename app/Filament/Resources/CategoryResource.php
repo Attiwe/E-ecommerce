@@ -5,14 +5,21 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\CategoryResource\Pages;
 use App\Filament\Resources\CategoryResource\RelationManagers;
 use App\Models\Category;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms;
+use Filament\Forms\Components\Card;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-
+use Filament\Forms\Set;
+use PhpParser\Node\Stmt\Label;
+use Str;
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
@@ -23,14 +30,20 @@ class CategoryResource extends Resource
     {
         return $form
             ->schema([
+               Card::make('الفئات')->schema([
                 Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('slug')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Toggle::make('status')
-                    ->required(),
+                ->required()
+                ->label('الفسم')
+                 ->live( true)
+                 ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state)))
+                ->maxLength(255),
+                TextInput::make('slug')
+                ->label('التاكيد')
+                ->hint('سيتم توليد هذا الحقل تلقائيًا، ليس عليك كتابة أي شيء هنا'),
+
+             Forms\Components\Toggle::make('status')
+                ->required(),
+                ])->columns(2)
             ]);
     }
 
@@ -38,6 +51,8 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\TextColumn::make('#')
+                ->rowIndex(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('slug')
@@ -52,16 +67,24 @@ class CategoryResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+                  
+                    // Tables\Columns\TextColumn::make(  'العمليات'),
+      
             ])
             ->filters([
-                //
+               
             ])
             ->actions([
+ 
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make(),
+
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+ 
                 ]),
             ]);
     }
@@ -78,7 +101,7 @@ class CategoryResource extends Resource
         return [
             'index' => Pages\ListCategories::route('/'),
             'create' => Pages\CreateCategory::route('/create'),
-            'edit' => Pages\EditCategory::route('/{record}/edit'),
+            // 'edit' => Pages\EditCategory::route('/{record}/edit'),
         ];
     }
 }

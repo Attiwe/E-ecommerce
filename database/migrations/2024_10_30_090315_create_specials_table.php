@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('specials', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)->constrained();
+             $table->foreignId('login_id')->constrained('login_users')->cascadeOnDelete();
             $table->string('name');
             $table->integer('price');
             $table->decimal('discount',10,2);

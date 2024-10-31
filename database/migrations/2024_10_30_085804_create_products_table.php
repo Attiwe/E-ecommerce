@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Category;
+use App\Models\LoginUser;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,8 +16,9 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)->constrained();
-            $table->foreignIdFor(Category::class)->constrained();
+            $table->foreignId('loginUser_id')->constrained('login_users')->cascadeOnDelete();
+            $table->foreignId('brand_id')->constrained('brands')->cascadeOnDelete() ;
+            $table->foreignId('Categore_id')->constrained('categories')->cascadeOnUpdate();
             $table->string('name');
             $table->text('description');
             $table->string('color');
