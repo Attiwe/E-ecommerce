@@ -21,18 +21,21 @@ class SubCategoryResource extends Resource
 {
     protected static ?string $model = SubCategory::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-tag';
+
+    // protected static ?string $navigationGroup = 'SubCategory';
+    public static function getNavigationGroup(): ?string
+    {
+        return app()->getLocale() === 'ar' ? "الاقسام" : "Category";  
+    }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Section::make('اختيار النوع')->schema([ 
-               Section::make('الاقسام')->schema([
-                Select::make('categre_id')
-                ->relationship('categres', 'name')  
-                ->required(),
-               ]),
+               Section::make('اختيار النوع')->schema([ 
+              
+            ]),
                Section::make([
                 Forms\Components\TextInput::make('name')
                 ->label('الفئه')
@@ -47,11 +50,12 @@ class SubCategoryResource extends Resource
                 ])->columns(2),
                 Forms\Components\FileUpload::make('image')
                     ->image()
+                    ->reorderable()
                     ->directory('SubCategory')
                     ->required(),
                 Forms\Components\Toggle::make('status')
                     ->required(),
-            ])
+            
         ]);
     }
 
@@ -59,11 +63,11 @@ class SubCategoryResource extends Resource
     {
         return $table
             ->columns([
+                
                 Tables\Columns\TextColumn::make('#')
                 ->rowIndex(),
-                Tables\Columns\TextColumn::make('categres.name')
-                     
-                    ->sortable(),
+                // Tables\Columns\TextColumn::make('categres.name')
+                //     ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('slug')
@@ -73,8 +77,9 @@ class SubCategoryResource extends Resource
                   
                 Tables\Columns\IconColumn::make('status')
                     ->boolean(),
+                
                     Tables\Columns\ImageColumn::make('image')
-                    ->rounded(),
+                   ,
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -90,7 +95,7 @@ class SubCategoryResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                //  Tables\Actions\DeleteAction::make(),
                 Tables\Actions\ViewAction::make(),
 
             ])
@@ -115,5 +120,9 @@ class SubCategoryResource extends Resource
             'create' => Pages\CreateSubCategory::route('/create'),
             // 'edit' => Pages\EditSubCategory::route('/{record}/edit'),
         ];
+    }
+ 
+    public static function getPluralLabel():string{
+        return app()->getLocale() =='ar' ? 'الفئات الفرعية' : 'SubCategory';
     }
 }

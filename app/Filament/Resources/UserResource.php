@@ -18,7 +18,13 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user';
+    
+    public static function getNavigationGroup(): ?string
+    {
+        return app()->getLocale() === 'ar' ? "المستخدمين" : "Users";  
+    }
+     
 
     public static function form(Form $form): Form
     {
@@ -57,6 +63,7 @@ class UserResource extends Resource
                      ->searchable(),
                 Tables\Columns\TextColumn::make('email_verified_at')
                     ->dateTime()
+                    ->toggleable(isToggledHiddenByDefault: true)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -72,6 +79,8 @@ class UserResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -94,5 +103,8 @@ class UserResource extends Resource
             // 'create' => Pages\CreateUser::route('/create'),
             'edit' => Pages\EditUser::route('/{record}/edit'),
         ];
+    }
+    public static function getPluralLabel():string{
+        return app()->getLocale() =='ar' ? 'المالك' : 'Owner';
     }
 }

@@ -10,12 +10,14 @@ use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Forms\Set;
 use PhpParser\Node\Stmt\Label;
@@ -23,8 +25,22 @@ use Str;
 class CategoryResource extends Resource
 {
     protected static ?string $model = Category::class;
+    protected static ?string $navigationGroup = 'Category';
+    protected static ?int $navigationSort = 1;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $recordTitleAttribute = 'name';//searsh
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        return $record->name;
+    }
+    public static function getNavigationGroup(): ?string
+    {
+        return app()->getLocale() === 'ar' ? "الاقسام" : "Category";  
+    }
+     
+    
+    protected static ?string $navigationIcon = 'heroicon-o-bookmark';
 
     public static function form(Form $form): Form
     {
@@ -33,6 +49,7 @@ class CategoryResource extends Resource
                Card::make('الفئات')->schema([
                 Forms\Components\TextInput::make('name')
                 ->required()
+ 
                 ->label('الفسم')
                  ->live( true)
                  ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state)))
@@ -41,7 +58,11 @@ class CategoryResource extends Resource
                 ->label('التاكيد')
                 ->hint('سيتم توليد هذا الحقل تلقائيًا، ليس عليك كتابة أي شيء هنا'),
 
-             Forms\Components\Toggle::make('status')
+                Select::make('subcategory_id')
+                        ->relationship('subcategor', 'name')
+                        ->label('الفئة الفرعية')
+                        ->nullable(),
+                Forms\Components\Toggle::make('status')
                 ->required(),
                 ])->columns(2)
             ]);
@@ -57,6 +78,10 @@ class CategoryResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('slug')
                     ->searchable(),
+                    Tables\Columns\TextColumn::make('subcategor.name')
+                    ->label('الفئة الفرعية')
+                    ->searchable(),
+                       
                 Tables\Columns\IconColumn::make('status')
                     ->boolean(),
                 Tables\Columns\TextColumn::make('created_at')
@@ -68,8 +93,7 @@ class CategoryResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                   
-                    // Tables\Columns\TextColumn::make(  'العمليات'),
-      
+       
             ])
             ->filters([
                
@@ -77,7 +101,7 @@ class CategoryResource extends Resource
             ->actions([
  
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                // Tables\Actions\DeleteAction::make(),
                 Tables\Actions\ViewAction::make(),
 
             ])
@@ -103,5 +127,8 @@ class CategoryResource extends Resource
             'create' => Pages\CreateCategory::route('/create'),
             // 'edit' => Pages\EditCategory::route('/{record}/edit'),
         ];
+    }
+    public static function getPluralLabel():string{
+        return app()->getLocale() =='ar' ? 'الفئات ' : 'Category';
     }
 }

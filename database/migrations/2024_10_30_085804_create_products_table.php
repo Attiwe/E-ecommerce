@@ -16,22 +16,20 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('loginUser_id')->constrained('login_users')->cascadeOnDelete();
-            $table->foreignId('brand_id')->constrained('brands')->cascadeOnDelete() ;
+             $table->foreignId('brand_id')->constrained('brands')->cascadeOnDelete() ;
             $table->foreignId('Categore_id')->constrained('categories')->cascadeOnUpdate();
             $table->string('name');
             $table->text('description');
-            $table->string('color');
+            $table->string('color');        
             $table->string('size');
             $table->string('slug');
             $table->integer('quantity');
             $table->integer('rating');
             $table->integer('discount');
             $table->decimal('price',10,2);
-            $table->string('image');
-            $table->boolean('status')->default(1);
-            $table->softDeletes();
-            $table->timestamps();
+             $table->json('images')->nullable();
+             $table->boolean('status')->default(1);
+             $table->timestamps();
         });
     }
 

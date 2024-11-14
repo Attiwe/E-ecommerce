@@ -4,8 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SpecialResource\Pages;
 use App\Filament\Resources\SpecialResource\RelationManagers;
+use App\Models\LoginUser;
 use App\Models\Special;
 use Filament\Forms;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -17,42 +20,76 @@ class SpecialResource extends Resource
 {
     protected static ?string $model = Special::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-star';
+    protected static ?int $navigationSort = 5;
 
+    public static function getNavigationGroup(): ?string
+    {
+        return app()->getLocale() === 'ar' ? "الرسم الخاص بالمستخدم" : "Special";  
+    }
+     
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('user_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('price')
-                    ->required()
-                    ->numeric()
-                    ->prefix('$'),
-                Forms\Components\TextInput::make('discount')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('quantity')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('rating')
-                    ->required()
-                    ->numeric(),
+                Section::make([
+                    Section::make('###')->schema([
+                        Select::make('login_id')
+                    ->label('مالك المنتج')
+                        ->options(LoginUser::all()->mapWithKeys(function($user) {
+                            return [$user->id => "{$user->first_name} {$user->last_name}"];  
+                        }))
+                        ->required(),
+        
+                    Forms\Components\TextInput::make('name')
+                        ->required()
+                        ->label('اسم المنتج')
+                        ->maxLength(255),
+                    ])->columns(2),
+    
+                     Section::make([
+                        Forms\Components\Select::make('size')
+                        ->required()
+                        ->label('المقسات')
+                        ->options([
+                            'L' => 'L',
+                            'XL' => 'XL',
+                            'XXL' => 'XXL',
+                        ]),
+         
+                    Forms\Components\TextInput::make('price')
+                        ->required()
+                        ->label('السعر')
+                        ->nullable()  
+                        ->prefix('$'),
+        
+                    Forms\Components\TextInput::make('discount')
+                        ->required()
+                        ->label('الخصم')
+                        ->nullable(),
+        
+                    Forms\Components\TextInput::make('quantity')
+                        ->required()
+                        ->label('العدد')
+                        ->numeric(),
+        
+                    Forms\Components\TextInput::make('rating')
+                        ->required()
+                        ->label('التقيم')
+                        ->numeric(),
+                        Forms\Components\Toggle::make('status')
+                        ->label('الحاله')
+                        ->required(),
+                     ])->columns(2),
+    
                 Forms\Components\FileUpload::make('image')
                     ->image()
+                    ->label('صوره المنتج')
                     ->required(),
-                Forms\Components\TextInput::make('size')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Toggle::make('status')
-                    ->required(),
+                 ])
             ]);
     }
-
+    
     public static function table(Table $table): Table
     {
         return $table
@@ -119,5 +156,8 @@ class SpecialResource extends Resource
             'create' => Pages\CreateSpecial::route('/create'),
             'edit' => Pages\EditSpecial::route('/{record}/edit'),
         ];
+    }
+    public static function getPluralLabel():string{
+        return app()->getLocale() =='ar' ? 'الرسم الابدعي' : 'Special';
     }
 }
